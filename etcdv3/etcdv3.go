@@ -2,15 +2,16 @@ package etcdv3
 
 import (
 	"context"
+	"crypto/tls"
+	"crypto/x509"
+	"encoding/base64"
 	"fmt"
+	"github.com/etcd-manage/etcdsdk/model"
+	clientv3 "go.etcd.io/etcd/client/v3"
 	"log"
 	"sort"
 	"sync"
 	"time"
-
-	"github.com/coreos/etcd/clientv3"
-	"github.com/coreos/etcd/pkg/transport"
-	"github.com/etcd-manage/etcdsdk/model"
 )
 
 var (
@@ -47,7 +48,7 @@ func NewClient(cfg *model.Config) (client model.EtcdSdk, err error) {
 
 	if cfg.TlsEnable == true {
 		// 数据库配置存储为key文件内容，此处每次都将内容写入文件
-		certFilePath, keyFilePath, caFilePath, err := writeCa(cfg, cfg.EtcdId)
+		/*certFilePath, keyFilePath, caFilePath, err := writeCa(cfg, cfg.EtcdId)
 		if err != nil {
 			return client, err
 		}
@@ -60,6 +61,22 @@ func NewClient(cfg *model.Config) (client model.EtcdSdk, err error) {
 		tlsConfig, err := tlsInfo.ClientConfig()
 		if err != nil {
 			return nil, err
+		}*/
+
+		certPEMBlock, _ := base64.StdEncoding.DecodeString(cfg.CertFile)
+		keyPEMBlock, _ := base64.StdEncoding.DecodeString(cfg.KeyFile)
+		cert, err := tls.X509KeyPair(certPEMBlock, keyPEMBlock)
+		if err != nil {
+			return nil, err
+		}
+
+		pool := x509.NewCertPool()
+		pemCerts, _ := base64.StdEncoding.DecodeString(cfg.CaFile)
+		pool.AppendCertsFromPEM(pemCerts)
+
+		tlsConfig := &tls.Config{
+			Certificates: []tls.Certificate{cert},
+			RootCAs:      pool,
 		}
 
 		cli, err = clientv3.New(clientv3.Config{

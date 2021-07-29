@@ -10,8 +10,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/coreos/etcd/client"
 	"github.com/etcd-manage/etcdsdk/model"
+	"go.etcd.io/etcd/client/v2"
 )
 
 var (

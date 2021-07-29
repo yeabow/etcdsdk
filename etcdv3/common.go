@@ -6,8 +6,8 @@ import (
 	"io/ioutil"
 	"strings"
 
-	"github.com/coreos/etcd/mvcc/mvccpb"
 	"github.com/etcd-manage/etcdsdk/model"
+	"go.etcd.io/etcd/api/v3/mvccpb"
 )
 
 // ConvertToPath 处理etcd3 的key为目录形式 - path只能是/结尾或为空
